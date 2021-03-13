@@ -48,8 +48,7 @@ class SliceList:
 
         if self.__len < 0:
             self.__len = 0
-        # else:
-        # self.__len += 1 if self.__len % abs(self.__step) > 0 else 0
+
 
     def __getitem__(self, key):
         if isinstance(key, slice):

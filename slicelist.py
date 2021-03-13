@@ -134,11 +134,11 @@ if __name__ == '__main__':
         t2, b = measure(lambda: SliceList(lst)[s])
         print_ratio("slicing", "list", t1, "slicelist", t2)
 
-        t1, _ = measure(lambda: dummy_iter(a))
-        t2, _ = measure(lambda: dummy_iter(b))
-        print_ratio("iteration", "list", t1, "slicelist", t2)
+        t1, maxa = measure(lambda: max(a))
+        t2, maxb = measure(lambda: max(b))
+        print_ratio("max", "list", t1, "slicelist", t2)
 
-        equals = a == b.tolist()
+        equals = a == b.tolist() and maxa == maxb
         if not equals:
             print(a)
             print(b.explain())

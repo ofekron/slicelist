@@ -1,12 +1,12 @@
-class SliceList:
-    class SliceListIterator:
+from collections import Iterable, Iterator, defaultdict
+
+
+class SliceList(Iterable):
+    class SliceListIterator(Iterator):
         def __init__(self, lst):
             self.n = len(lst)
             self.lst = lst
             self.i = 0
-
-        def __iter__(self):
-            return self
 
         def __next__(self):
             if self.i >= self.n:
@@ -14,6 +14,9 @@ class SliceList:
             res = self.lst[self.i]
             self.i += 1
             return res
+
+        def next(self):
+            return self.__next__()
 
     def __init__(self, lst, slice_obj=None):
         self.__lst = lst if isinstance(lst, SliceList) or isinstance(lst, list) else list(lst)
@@ -48,7 +51,6 @@ class SliceList:
 
         if self.__len < 0:
             self.__len = 0
-
 
     def __getitem__(self, key):
         if isinstance(key, slice):
@@ -115,13 +117,23 @@ if __name__ == '__main__':
             pass
 
 
+    times = defaultdict(lambda : defaultdict(lambda: 0))
+
+
     def print_ratio(action, n1, t1, n2, t2):
-        print("%s : %s is faster then %s by factor of %.5f" % (
-            action, n2 if t1 > t2 else n1, n1 if t1 > t2 else n2, t1 / t2 if t1 > t2 else t2 / t1))
+        times[n1][action] += t1
+        times[n2][action] += t2
+        if (t1 == 0):
+            print("%s took zero time to execute" % (n1))
+        elif (t2 == 0):
+            print("%s took zero time to execute" % (n2))
+        else:
+            print("%s : %s is faster then %s by factor of %.5f" % (
+                action, n2 if t1 > t2 else n1, n1 if t1 > t2 else n2, t1 / t2 if t1 > t2 else t2 / t1))
 
 
     lst = list(range(1000000))
-    check = [None] + list(range(-100, 100))
+    check = [None] + list(range(-10, 10))
     slices = [slice(start, stop, step)
               for start in check
               for stop in check
@@ -131,14 +143,23 @@ if __name__ == '__main__':
         print("slice : " + str(s))
         t1, a = measure(lambda: lst[s])
         t2, b = measure(lambda: SliceList(lst)[s])
-        print_ratio("slicing", "list", t1, "slicelist", t2)
+        print_ratio("slicing", "list", t1, "SliceList", t2)
+
 
         t1, maxa = measure(lambda: max(a))
         t2, maxb = measure(lambda: max(b))
-        print_ratio("max", "list", t1, "slicelist", t2)
+        print_ratio("max", "list", t1, "SliceList", t2)
+
+
+        t1, maxa = measure(lambda: max(b[5:15]))
+        t2, maxb = measure(lambda: max(b[5:15]))
+        print_ratio("iterate small window", "list", t1, "SliceList", t2)
+
 
         equals = a == b.tolist() and maxa == maxb
         if not equals:
             print(a)
             print(b.explain())
         assert equals
+        print("times for list : " + str(times["list"]))
+        print("times for SliceList : " +  str(times["SliceList"]))
